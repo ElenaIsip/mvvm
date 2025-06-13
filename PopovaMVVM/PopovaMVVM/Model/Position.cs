@@ -37,6 +37,9 @@ namespace PopovaMVVM.Model
         }
 
         private Department _department;
+        internal object Employee;
+        internal IEnumerable<object> Employees;
+
         public Department Department
         {
             get => _department;

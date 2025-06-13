@@ -140,6 +140,32 @@ namespace PopovaMVVM.ViewModel
         public RelayCommand EditPaymentCommand { get; }
         public RelayCommand SavePaymentCommand { get; }
 
+        public RelayCommand FirstEmployeeCommand { get; }
+        public RelayCommand PreviousEmployeeCommand { get; }
+        public RelayCommand NextEmployeeCommand { get; }
+        public RelayCommand LastEmployeeCommand { get; }
+
+        public RelayCommand FirstPositionCommand { get; }
+        public RelayCommand PreviousPositionCommand { get; }
+        public RelayCommand NextPositionCommand { get; }
+        public RelayCommand LastPositionCommand { get; }
+
+        public RelayCommand FirstDepartmentCommand { get; }
+        public RelayCommand PreviousDepartmentCommand { get; }
+        public RelayCommand NextDepartmentCommand { get; }
+        public RelayCommand LastDepartmentCommand { get; }
+
+        public RelayCommand FirstStaffingCommand { get; }
+        public RelayCommand PreviousStaffingCommand { get; }
+        public RelayCommand NextStaffingCommand { get; }
+        public RelayCommand LastStaffingCommand { get; }
+
+        public RelayCommand FirstPaymentCommand { get; }
+        public RelayCommand PreviousPaymentCommand { get; }
+        public RelayCommand NextPaymentCommand { get; }
+        public RelayCommand LastPaymentCommand { get; }
+
+
         public RelayCommand ExitCommand { get; }
 
         public ClassViewModel()
@@ -166,6 +192,31 @@ namespace PopovaMVVM.ViewModel
             AddPaymentCommand = new RelayCommand(_ => AddPayment());
             DeletePaymentCommand = new RelayCommand(_ => DeletePayment());
             EditPaymentCommand = new RelayCommand(_ => EditPayment());
+
+            FirstEmployeeCommand = new RelayCommand(_ => MoveToFirstEmployee());
+            PreviousEmployeeCommand = new RelayCommand(_ => MoveToPreviousEmployee());
+            NextEmployeeCommand = new RelayCommand(_ => MoveToNextEmployee());
+            LastEmployeeCommand = new RelayCommand(_ => MoveToLastEmployee());
+
+            FirstPositionCommand = new RelayCommand(_ => MoveToFirstPosition());
+            PreviousPositionCommand = new RelayCommand(_ => MoveToPreviousPosition());
+            NextPositionCommand = new RelayCommand(_ => MoveToNextPosition());
+            LastPositionCommand = new RelayCommand(_ => MoveToLastPosition());
+
+            FirstDepartmentCommand = new RelayCommand(_ => MoveToFirstDepartment());
+            PreviousDepartmentCommand = new RelayCommand(_ => MoveToPreviousDepartment());
+            NextDepartmentCommand = new RelayCommand(_ => MoveToNextDepartment());
+            LastDepartmentCommand = new RelayCommand(_ => MoveToLastDepartment());
+
+            FirstStaffingCommand = new RelayCommand(_ => MoveToFirstStaffing());
+            PreviousStaffingCommand = new RelayCommand(_ => MoveToPreviousStaffing());
+            NextStaffingCommand = new RelayCommand(_ => MoveToNextStaffing());
+            LastStaffingCommand = new RelayCommand(_ => MoveToLastStaffing());
+
+            FirstPaymentCommand = new RelayCommand(_ => MoveToFirstPayment());
+            PreviousPaymentCommand = new RelayCommand(_ => MoveToPreviousPayment());
+            NextPaymentCommand = new RelayCommand(_ => MoveToNextPayment());
+            LastPaymentCommand = new RelayCommand(_ => MoveToLastPayment());
 
             ExitCommand = new RelayCommand(_ => System.Windows.Application.Current.Shutdown());
 
@@ -372,6 +423,158 @@ namespace PopovaMVVM.ViewModel
             {
                 pos.Department = Departments.FirstOrDefault(d => d.DepartmentId == pos.DepartmentId);
             }
+        }
+
+        private void MoveToFirstEmployee()
+        {
+            if (Employees.Any())
+            {
+                SelectedEmployee = Employees.First();
+            }
+        }
+
+        private void MoveToPreviousEmployee()
+        {
+            if (SelectedEmployee != null)
+            {
+                int currentIndex = Employees.IndexOf(SelectedEmployee);
+                if (currentIndex > 0)
+                {
+                    SelectedEmployee = Employees[currentIndex - 1];
+                }
+            }
+        }
+
+        private void MoveToNextEmployee()
+        {
+            if (SelectedEmployee != null)
+            {
+                int currentIndex = Employees.IndexOf(SelectedEmployee);
+                if (currentIndex < Employees.Count - 1)
+                {
+                    SelectedEmployee = Employees[currentIndex + 1];
+                }
+            }
+        }
+
+        private void MoveToLastEmployee()
+        {
+            if (Employees.Any())
+            {
+                SelectedEmployee = Employees.Last();
+            }
+        }
+
+        private void MoveToFirstPosition()
+        {
+            if (Positions.Any()) SelectedPosition = Positions.First();
+        }
+
+        private void MoveToPreviousPosition()
+        {
+            if (SelectedPosition != null)
+            {
+                int index = Positions.IndexOf(SelectedPosition);
+                if (index > 0) SelectedPosition = Positions[index - 1];
+            }
+        }
+
+        private void MoveToNextPosition()
+        {
+            if (SelectedPosition != null)
+            {
+                int index = Positions.IndexOf(SelectedPosition);
+                if (index < Positions.Count - 1) SelectedPosition = Positions[index + 1];
+            }
+        }
+
+        private void MoveToLastPosition()
+        {
+            if (Positions.Any()) SelectedPosition = Positions.Last();
+        }
+
+        private void MoveToFirstDepartment()
+        {
+            if (Departments.Any()) SelectedDepartment = Departments.First();
+        }
+
+        private void MoveToPreviousDepartment()
+        {
+            if (SelectedDepartment != null)
+            {
+                int index = Departments.IndexOf(SelectedDepartment);
+                if (index > 0) SelectedDepartment = Departments[index - 1];
+            }
+        }
+
+        private void MoveToNextDepartment()
+        {
+            if (SelectedDepartment != null)
+            {
+                int index = Departments.IndexOf(SelectedDepartment);
+                if (index < Departments.Count - 1) SelectedDepartment = Departments[index + 1];
+            }
+        }
+
+        private void MoveToLastDepartment()
+        {
+            if (Departments.Any()) SelectedDepartment = Departments.Last();
+        }
+
+        private void MoveToFirstStaffing()
+        {
+            if (Staffing.Any()) SelectedStaffing = Staffing.First();
+        }
+
+        private void MoveToPreviousStaffing()
+        {
+            if (SelectedStaffing != null)
+            {
+                int index = Staffing.IndexOf(SelectedStaffing);
+                if (index > 0) SelectedStaffing = Staffing[index - 1];
+            }
+        }
+
+        private void MoveToNextStaffing()
+        {
+            if (SelectedStaffing != null)
+            {
+                int index = Staffing.IndexOf(SelectedStaffing);
+                if (index < Staffing.Count - 1) SelectedStaffing = Staffing[index + 1];
+            }
+        }
+
+        private void MoveToLastStaffing()
+        {
+            if (Staffing.Any()) SelectedStaffing = Staffing.Last();
+        }
+
+        private void MoveToFirstPayment()
+        {
+            if (AdditionalPayments.Any()) SelectedPayment = AdditionalPayments.First();
+        }
+
+        private void MoveToPreviousPayment()
+        {
+            if (SelectedPayment != null)
+            {
+                int index = AdditionalPayments.IndexOf(SelectedPayment);
+                if (index > 0) SelectedPayment = AdditionalPayments[index - 1];
+            }
+        }
+
+        private void MoveToNextPayment()
+        {
+            if (SelectedPayment != null)
+            {
+                int index = AdditionalPayments.IndexOf(SelectedPayment);
+                if (index < AdditionalPayments.Count - 1) SelectedPayment = AdditionalPayments[index + 1];
+            }
+        }
+
+        private void MoveToLastPayment()
+        {
+            if (AdditionalPayments.Any()) SelectedPayment = AdditionalPayments.Last();
         }
 
         // CRUD методы

@@ -89,7 +89,6 @@ D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\EditEmployee.baml
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\EditPayment.baml
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\EditPosition.baml
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\EditStaffing.baml
-D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\PopovaMVVM.csproj.AssemblyReference.cache
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddPaymentWindow.g.cs
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddPaymentWindow.baml
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddStaffingWindow.g.cs
@@ -98,3 +97,4 @@ D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddPositionWindow.g.cs
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddPositionWindow.baml
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddDepartmentWindow.g.cs
 D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\ViewModel\AddDepartmentWindow.baml
+D:\Mvvm\PopovaMVVM\PopovaMVVM\obj\Debug\PopovaMVVM.csproj.ResolveComReference.cache

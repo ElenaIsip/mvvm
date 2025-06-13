@@ -11,8 +11,16 @@
     </Window.DataContext>
 
     <DockPanel>
+        <!-- Меню с кнопками отчетов -->
+        
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="905,0,0,5">
-        <Button Content="Выход" Command="{Binding ExitCommand}" Margin="2"/>
+            <Button Content="Выход" Command="{Binding ExitCommand}" Margin="2"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="856,0,-15.4,5" Width="153">
+            <Button x:Name="btnAllReports" 
+        Content="Создать все отчеты" 
+        Click="GenerateAllReports_Click" 
+        Margin="5"/>
         </StackPanel>
         <!-- Вкладки -->
         <TabControl>
@@ -25,6 +33,11 @@
                         <Button Content="Удалить" Command="{Binding DeleteEmployeeCommand}" Margin="2"/>
                         <Button Content="Редактировать" Command="{Binding EditEmployeeCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SaveEmployeeCommand}" Margin="2"/>
+                        <Button Content="|◄" Command="{Binding FirstEmployeeCommand}" Margin="2" ToolTip="Первая запись"/>
+                        <Button Content="◄" Command="{Binding PreviousEmployeeCommand}" Margin="2" ToolTip="Предыдущая запись"/>
+                        <Button Content="►" Command="{Binding NextEmployeeCommand}" Margin="2" ToolTip="Следующая запись"/>
+                        <Button Content="►|" Command="{Binding LastEmployeeCommand}" Margin="2" ToolTip="Последняя запись"/>
+
                     </StackPanel>
                     <!-- Таблица сотрудников -->
                     <Grid>
@@ -71,6 +84,10 @@
                         <Button Content="Удалить" Command="{Binding DeletePositionCommand}" Margin="2"/>
                         <Button Content="Редактировать" Command="{Binding EditPositionCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SavePositionCommand}" Margin="2"/>
+                        <Button Content="|◄" Command="{Binding FirstPositionCommand}" Margin="2" ToolTip="Первая запись"/>
+                        <Button Content="◄" Command="{Binding PreviousPositionCommand}" Margin="2" ToolTip="Предыдущая запись"/>
+                        <Button Content="►" Command="{Binding NextPositionCommand}" Margin="2" ToolTip="Следующая запись"/>
+                        <Button Content="►|" Command="{Binding LastPositionCommand}" Margin="2" ToolTip="Последняя запись"/>
                     </StackPanel>
                     <DataGrid ItemsSource="{Binding Positions}"  SelectedItem="{Binding SelectedPosition, Mode=TwoWay}" AutoGenerateColumns="False" Height="Auto" Margin="0,0,0,10">
                         <DataGrid.Columns>
@@ -90,6 +107,10 @@
                         <Button Content="Удалить" Command="{Binding DeleteDepartmentCommand}" Margin="2"/>
                         <Button Content="Редактировать" Command="{Binding EditDepartmentCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SaveDepartmentCommand}" Margin="2"/>
+                        <Button Content="|◄" Command="{Binding FirstDepartmentCommand}" Margin="2" ToolTip="Первая запись"/>
+                        <Button Content="◄" Command="{Binding PreviousDepartmentCommand}" Margin="2" ToolTip="Предыдущая запись"/>
+                        <Button Content="►" Command="{Binding NextDepartmentCommand}" Margin="2" ToolTip="Следующая запись"/>
+                        <Button Content="►|" Command="{Binding LastDepartmentCommand}" Margin="2" ToolTip="Последняя запись"/>
                     </StackPanel>
                     <Grid>
                         <Grid.RowDefinitions>
@@ -125,6 +146,10 @@
                         <Button Content="Удалить" Command="{Binding DeleteStaffingCommand}" Margin="2"/>
                         <Button Content="Редактировать" Command="{Binding EditStaffingCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SaveStaffingCommand}" Margin="2"/>
+                        <Button Content="|◄" Command="{Binding FirstStaffingCommand}" Margin="2" ToolTip="Первая запись"/>
+                        <Button Content="◄" Command="{Binding PreviousStaffingCommand}" Margin="2" ToolTip="Предыдущая запись"/>
+                        <Button Content="►" Command="{Binding NextStaffingCommand}" Margin="2" ToolTip="Следующая запись"/>
+                        <Button Content="►|" Command="{Binding LastStaffingCommand}" Margin="2" ToolTip="Последняя запись"/>
                     </StackPanel>
                     <DataGrid ItemsSource="{Binding Staffing}" SelectedItem="{Binding SelectedStaffing, Mode=TwoWay}" AutoGenerateColumns="False" Margin="5">
                         <DataGrid.Columns>
@@ -146,6 +171,10 @@
                         <Button Content="Удалить" Command="{Binding DeletePaymentCommand}" Margin="2"/>
                         <Button Content="Редактировать" Command="{Binding EditPaymentCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SavePaymentCommand}" Margin="2"/>
+                        <Button Content="|◄" Command="{Binding FirstPaymentCommand}" Margin="2" ToolTip="Первая запись"/>
+                        <Button Content="◄" Command="{Binding PreviousPaymentCommand}" Margin="2" ToolTip="Предыдущая запись"/>
+                        <Button Content="►" Command="{Binding NextPaymentCommand}" Margin="2" ToolTip="Следующая запись"/>
+                        <Button Content="►|" Command="{Binding LastPaymentCommand}" Margin="2" ToolTip="Последняя запись"/>
                     </StackPanel>
                     <DataGrid ItemsSource="{Binding AdditionalPayments}"  SelectedItem="{Binding SelectedPayment, Mode=TwoWay}" AutoGenerateColumns="False" Margin="5">
                         <DataGrid.Columns>

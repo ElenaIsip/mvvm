@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using PopovaMVVM.ViewModel;
 
 namespace PopovaMVVM
@@ -22,11 +23,16 @@ namespace PopovaMVVM
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly AppDbContext _context;
+        private readonly ReportGenerator _reportGenerator;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            // Убедитесь, что DataContext устанавливается один раз
+            _context = new AppDbContext();
+            _reportGenerator = new ReportGenerator(_context);
+
             DataContext = new ClassViewModel();
             Closing += MainWindow_Closing;
         }
@@ -35,5 +41,32 @@ namespace PopovaMVVM
         {
             (DataContext as ClassViewModel)?.SaveData();
         }
+
+        // Новая кнопка для генерации всех отчетов в одном файле
+        private void GenerateAllReports_Click(object sender, RoutedEventArgs e)
+        {
+            var saveDialog = new SaveFileDialog
+            {
+                Filter = "Excel Files|*.xlsx",
+                FileName = "Все_отчеты.xlsx"
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    _reportGenerator.GenerateAllReportsInOneFile(saveDialog.FileName);
+                    MessageBox.Show("Все отчеты успешно созданы в одном файле!", "Успех",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка генерации отчетов",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        
     }
 }
