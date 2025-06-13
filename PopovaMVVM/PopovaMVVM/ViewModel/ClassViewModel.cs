@@ -13,16 +13,35 @@ using System.Windows;
 using GalaSoft.MvvmLight;
 using Newtonsoft.Json;
 using System.IO;
+using System.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace PopovaMVVM.ViewModel
 {
+
     class ClassViewModel : ObservableObject
     {
+        private readonly AppDbContext _dbContext;
+
         // Коллекции данных
         public ObservableCollection<Employee> Employees { get; } = new ObservableCollection<Employee>();
         public ObservableCollection<Position> Positions { get; } = new ObservableCollection<Position>();
         public ObservableCollection<Department> Departments { get; } = new ObservableCollection<Department>();
         public ObservableCollection<AdditionalPayment> AdditionalPayments { get; } = new ObservableCollection<AdditionalPayment>();
+
+        internal void SaveData()
+        {
+            try
+            {
+                _dbContext.SaveChanges();
+                MessageBox.Show("Данные успешно сохранены!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения данных: {ex.Message}");
+            }
+        }
+
         public ObservableCollection<Staffing> Staffing { get; } = new ObservableCollection<Staffing>();
 
         // Выбранные элементы
@@ -125,146 +144,100 @@ namespace PopovaMVVM.ViewModel
 
         public ClassViewModel()
         {
+            _dbContext = new AppDbContext();
+
             // Инициализация команд
             AddEmployeeCommand = new RelayCommand(_ => AddEmployee());
             DeleteEmployeeCommand = new RelayCommand(_ => DeleteEmployee());
             EditEmployeeCommand = new RelayCommand(_ => EditEmployee());
-            SaveEmployeeCommand = new RelayCommand(_ => SaveEmployees());
 
             AddPositionCommand = new RelayCommand(_ => AddPosition());
             DeletePositionCommand = new RelayCommand(_ => DeletePosition());
             EditPositionCommand = new RelayCommand(_ => EditPosition());
-            SavePositionCommand = new RelayCommand(_ => SavePositions());
 
             AddDepartmentCommand = new RelayCommand(_ => AddDepartment());
             DeleteDepartmentCommand = new RelayCommand(_ => DeleteDepartment());
             EditDepartmentCommand = new RelayCommand(_ => EditDepartment());
-            SaveDepartmentCommand = new RelayCommand(_ => SaveDepartments());
 
             AddStaffingCommand = new RelayCommand(_ => AddStaffing());
             DeleteStaffingCommand = new RelayCommand(_ => DeleteStaffing());
             EditStaffingCommand = new RelayCommand(_ => EditStaffing());
-            SaveStaffingCommand = new RelayCommand(_ => SaveStaffings());
 
             AddPaymentCommand = new RelayCommand(_ => AddPayment());
             DeletePaymentCommand = new RelayCommand(_ => DeletePayment());
             EditPaymentCommand = new RelayCommand(_ => EditPayment());
-            SavePaymentCommand = new RelayCommand(_ => SavePayments());
 
             ExitCommand = new RelayCommand(_ => System.Windows.Application.Current.Shutdown());
 
             LoadData();
         }
 
-        // Загрузка данных из настроек приложения
+        // Загрузка данных из базы данных
         public void LoadData()
-        {
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.AppData))
-            {
-                try
-                {
-                    var data = JsonConvert.DeserializeObject<StoredData>(Properties.Settings.Default.AppData);
-                    if (data != null)
-                    {
-                        // Очищаем коллекции перед загрузкой
-                        Employees.Clear();
-                        Positions.Clear();
-                        Departments.Clear();
-                        AdditionalPayments.Clear();
-                        Staffing.Clear();
-
-                        // Загружаем данные
-                        Employees.AddRange(data.Employees ?? Enumerable.Empty<Employee>());
-                        Positions.AddRange(data.Positions ?? Enumerable.Empty<Position>());
-                        Departments.AddRange(data.Departments ?? Enumerable.Empty<Department>());
-                        AdditionalPayments.AddRange(data.AdditionalPayments ?? Enumerable.Empty<AdditionalPayment>());
-                        Staffing.AddRange(data.Staffing ?? Enumerable.Empty<Staffing>());
-
-                        LinkNavigationProperties();
-                        return; // Выходим, данные загружены
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}");
-                    // В случае ошибок — запускаем дефолтные данные
-                }
-            }
-            // Если данных нет или произошла ошибка — инициализация дефолтных данных
-            InitializeDefaultData();
-        }
-
-        // Сохранение данных в настройки приложения
-        public void SaveData()
         {
             try
             {
-                var data = new StoredData
-                {
-                    Employees = Employees.ToList(),
-                    Positions = Positions.ToList(),
-                    Departments = Departments.ToList(),
-                    AdditionalPayments = AdditionalPayments.ToList(),
-                    Staffing = Staffing.ToList()
-                };
+                // Очищаем коллекции перед загрузкой
+                Employees.Clear();
+                Positions.Clear();
+                Departments.Clear();
+                AdditionalPayments.Clear();
+                Staffing.Clear();
 
-                var settings = new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                };
+                // Загружаем данные из базы
+                _dbContext.Departments.Load();
+                _dbContext.Positions.Load();
+                _dbContext.Employees.Include(e => e.Children).Load();
+                _dbContext.Staffing.Load();
+                _dbContext.AdditionalPayments.Load();
 
-                Properties.Settings.Default.AppData = JsonConvert.SerializeObject(data, Formatting.Indented, settings);
-                Properties.Settings.Default.Save();
+                // Заполняем коллекции
+                Employees.AddRange(_dbContext.Employees.Local.ToObservableCollection());
+                Positions.AddRange(_dbContext.Positions.Local.ToObservableCollection());
+                Departments.AddRange(_dbContext.Departments.Local.ToObservableCollection());
+                Staffing.AddRange(_dbContext.Staffing.Local.ToObservableCollection());
+                AdditionalPayments.AddRange(_dbContext.AdditionalPayments.Local.ToObservableCollection());
+
+                // Если база пустая, инициализируем тестовыми данными
+                if (!Departments.Any())
+                {
+                    InitializeDefaultData();
+                }
+
+                LinkNavigationProperties();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}");
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}");
             }
         }
 
         // Инициализация тестовыми данными
         private void InitializeDefaultData()
         {
-            Departments.Clear();
-            Positions.Clear();
-            Employees.Clear();
-            Staffing.Clear();
-            AdditionalPayments.Clear();
-
-            var departments = new[]
+            try
             {
-                new Department { DepartmentId = 1, Name = "IT-отдел" },
-                new Department { DepartmentId = 2, Name = "Финансовый отдел" },
-                new Department { DepartmentId = 3, Name = "Отдел продаж" },
-                new Department { DepartmentId = 4, Name = "Отдел кадров" },
-                new Department { DepartmentId = 5, Name = "Техническая поддержка" }
-            };
-            Departments.AddRange(departments);
+                // Создаем отделы
+                var dept1 = new Department { Name = "IT-отдел" };
+                var dept2 = new Department { Name = "Финансовый отдел" };
+                var dept3 = new Department { Name = "Отдел продаж" };
+                var dept4 = new Department { Name = "Отдел кадров" };
+                var dept5 = new Department { Name = "Техническая поддержка" };
+                _dbContext.Departments.AddRange(dept1, dept2, dept3, dept4, dept5);
+                _dbContext.SaveChanges();
 
-            var positions = new[]
-            {
-                new Position { PositionId = 1, Title = "Разработчик", DepartmentId = 1 },
-                new Position { PositionId = 2, Title = "Бухгалтер", DepartmentId = 2 },
-                new Position { PositionId = 3, Title = "Менеджер продаж", DepartmentId = 3 },
-                new Position { PositionId = 4, Title = "HR-специалист", DepartmentId = 4 },
-                new Position { PositionId = 5, Title = "Технический специалист", DepartmentId = 5 }
-            };
-            Positions.AddRange(positions);
+                // Должности
+                var pos1 = new Position { Title = "Разработчик", DepartmentId = dept1.DepartmentId };
+                var pos2 = new Position { Title = "Бухгалтер", DepartmentId = dept2.DepartmentId };
+                var pos3 = new Position { Title = "Менеджер продаж", DepartmentId = dept3.DepartmentId };
+                var pos4 = new Position { Title = "HR-специалист", DepartmentId = dept4.DepartmentId };
+                var pos5 = new Position { Title = "Технический специалист", DepartmentId = dept5.DepartmentId };
+                _dbContext.Positions.AddRange(pos1, pos2, pos3, pos4, pos5);
+                _dbContext.SaveChanges();
 
-            // Связи отделов и позиций
-            foreach (var position in positions)
-            {
-                var dept = departments.First(d => d.DepartmentId == position.DepartmentId);
-                dept.Positions = new ObservableCollection<Position>();
-                dept.Positions.Add(position);
-            }
-
-            // Создаем сотрудников
-            var employees = new[]
-            {
-                new Employee
+                // Сотрудники
+                var emp1 = new Employee
                 {
-                    EmployeeId = 1,
                     LastName = "Иванов",
                     FirstName = "Иван",
                     MiddleName = "Иванович",
@@ -272,16 +245,16 @@ namespace PopovaMVVM.ViewModel
                     BirthDate = new DateTime(1985, 5, 15),
                     AppointmentDate = new DateTime(2010, 3, 1),
                     Salary = 100000,
-                    PositionId = 1,
+                    PositionId = pos1.PositionId,
                     Children = new ObservableCollection<Child>
                     {
-                        new Child { ChildId=1, FullName="Иванова Мария Ивановна", BirthDate=new DateTime(2012,3,24) },
-                        new Child { ChildId=2, FullName="Иванов Петр Иванович", BirthDate=new DateTime(2015,7,12) }
+                        new Child { FullName = "Иванова Мария Ивановна", DateOfBirth = new DateTime(2012, 3, 24) },
+                        new Child { FullName = "Иванов Петр Иванович", DateOfBirth = new DateTime(2015, 7, 12) }
                     }
-                },
-                new Employee
+                };
+
+                var emp2 = new Employee
                 {
-                    EmployeeId = 2,
                     LastName = "Петрова",
                     FirstName = "Ольга",
                     MiddleName = "Сергеевна",
@@ -289,15 +262,15 @@ namespace PopovaMVVM.ViewModel
                     BirthDate = new DateTime(1990, 8, 22),
                     AppointmentDate = new DateTime(2015, 6, 10),
                     Salary = 90000,
-                    PositionId = 2,
+                    PositionId = pos2.PositionId,
                     Children = new ObservableCollection<Child>
                     {
-                        new Child { ChildId=3, FullName="Петрова Анна Сергеевна", BirthDate=new DateTime(2018,4,5) }
+                        new Child { FullName = "Петрова Анна Сергеевна", DateOfBirth = new DateTime(2018, 4, 5) }
                     }
-                },
-                new Employee
+                };
+
+                var emp3 = new Employee
                 {
-                    EmployeeId = 3,
                     LastName = "Сидоров",
                     FirstName = "Алексей",
                     MiddleName = "Петрович",
@@ -305,65 +278,72 @@ namespace PopovaMVVM.ViewModel
                     BirthDate = new DateTime(1988, 11, 5),
                     AppointmentDate = new DateTime(2018, 2, 15),
                     Salary = 120000,
-                    PositionId = 3,
-                    Children = new ObservableCollection<Child>()
-                },
-                new Employee
+                    PositionId = pos3.PositionId
+                };
+
+                var emp4 = new Employee
                 {
-                    EmployeeId=4,
-                    LastName="Кузнецова",
-                    FirstName="Екатерина",
-                    MiddleName="Андреевна",
-                    Gender="Ж",
-                    BirthDate=new DateTime(1992,3,18),
-                    AppointmentDate=new DateTime(2019,7,22),
-                    Salary=95000,
-                    PositionId=4,
-                    Children=new ObservableCollection<Child>
+                    LastName = "Кузнецова",
+                    FirstName = "Екатерина",
+                    MiddleName = "Андреевна",
+                    Gender = "Ж",
+                    BirthDate = new DateTime(1992, 3, 18),
+                    AppointmentDate = new DateTime(2019, 7, 22),
+                    Salary = 95000,
+                    PositionId = pos4.PositionId,
+                    Children = new ObservableCollection<Child>
                     {
-                        new Child { ChildId=4, FullName="Кузнецов Дмитрий Иванович", BirthDate=new DateTime(2017,9,3) },
-                        new Child { ChildId=5, FullName="Кузнецова София Ивановна", BirthDate=new DateTime(2020,1,15) }
+                        new Child { FullName = "Кузнецов Дмитрий Иванович", DateOfBirth = new DateTime(2017, 9, 3) },
+                        new Child { FullName = "Кузнецова София Ивановна", DateOfBirth = new DateTime(2020, 1, 15) }
                     }
-                },
-                new Employee
+                };
+
+                var emp5 = new Employee
                 {
-                    EmployeeId=5,
-                    LastName="Васильев",
-                    FirstName="Дмитрий",
-                    MiddleName="Николаевич",
-                    Gender="М",
-                    BirthDate=new DateTime(1987,6,30),
-                    AppointmentDate=new DateTime(2017,4,10),
-                    Salary=85000,
-                    PositionId=5,
-                    Children=new ObservableCollection<Child>()
-                }
-            };
-            Employees.AddRange(employees);
+                    LastName = "Васильев",
+                    FirstName = "Дмитрий",
+                    MiddleName = "Николаевич",
+                    Gender = "М",
+                    BirthDate = new DateTime(1987, 6, 30),
+                    AppointmentDate = new DateTime(2017, 4, 10),
+                    Salary = 85000,
+                    PositionId = pos5.PositionId
+                };
 
-            // Штатное расписание
-            var staffing = new[]
+                _dbContext.Employees.AddRange(emp1, emp2, emp3, emp4, emp5);
+                _dbContext.SaveChanges();
+
+                // Штатное расписание
+                var staffing = new[]
+                {
+                    new Staffing { DepartmentId = dept1.DepartmentId, PositionId = pos1.PositionId, UnitsCount = 5, Salary = 100000 },
+                    new Staffing { DepartmentId = dept2.DepartmentId, PositionId = pos2.PositionId, UnitsCount = 3, Salary = 90000 },
+                    new Staffing { DepartmentId = dept3.DepartmentId, PositionId = pos3.PositionId, UnitsCount = 4, Salary = 120000 },
+                    new Staffing { DepartmentId = dept4.DepartmentId, PositionId = pos4.PositionId, UnitsCount = 2, Salary = 95000 },
+                    new Staffing { DepartmentId = dept5.DepartmentId, PositionId = pos5.PositionId, UnitsCount = 6, Salary = 85000 }
+                };
+                _dbContext.Staffing.AddRange(staffing);
+
+                // Дополнительные выплаты
+                var payments = new[]
+                {
+                    new AdditionalPayment { PositionId = pos1.PositionId, Amount = 20000, Description = "Премия за проект" },
+                    new AdditionalPayment { PositionId = pos2.PositionId, Amount = 15000, Description = "Годовая премия" },
+                    new AdditionalPayment { PositionId = pos3.PositionId, Amount = 25000, Description = "Бонус за выполнение плана" },
+                    new AdditionalPayment { PositionId = pos4.PositionId, Amount = 10000, Description = "Надбавка за квалификацию" },
+                    new AdditionalPayment { PositionId = pos5.PositionId, Amount = 12000, Description = "Премия за качество обслуживания" }
+                };
+                _dbContext.AdditionalPayments.AddRange(payments);
+
+                _dbContext.SaveChanges();
+
+                // Обновляем данные после инициализации
+                LoadData();
+            }
+            catch (Exception ex)
             {
-                new Staffing { StaffingId=1, DepartmentId=1, PositionId=1, UnitsCount=5, Salary=100000 },
-                new Staffing { StaffingId=2, DepartmentId=2, PositionId=2, UnitsCount=3, Salary=90000 },
-                new Staffing { StaffingId=3, DepartmentId=3, PositionId=3, UnitsCount=4, Salary=120000 },
-                new Staffing { StaffingId=4, DepartmentId=4, PositionId=4, UnitsCount=2, Salary=95000 },
-                new Staffing { StaffingId=5, DepartmentId=5, PositionId=5, UnitsCount=6, Salary=85000 }
-            };
-            Staffing.AddRange(staffing);
-
-            // Дополнительные выплаты
-            var payments = new[]
-            {
-                new AdditionalPayment { PaymentId=1, PositionId=1, Amount=20000, Description="Премия за проект" },
-                new AdditionalPayment { PaymentId=2, PositionId=2, Amount=15000, Description="Годовая премия" },
-                new AdditionalPayment { PaymentId=3, PositionId=3, Amount=25000, Description="Бонус за выполнение плана" },
-                new AdditionalPayment { PaymentId=4, PositionId=4, Amount=10000, Description="Надбавка за квалификацию" },
-                new AdditionalPayment { PaymentId=5, PositionId=5, Amount=12000, Description="Премия за качество обслуживания" }
-            };
-            AdditionalPayments.AddRange(payments);
-
-            LinkNavigationProperties();
+                MessageBox.Show($"Ошибка инициализации данных: {ex.Message}");
+            }
         }
 
         private void LinkNavigationProperties()
@@ -374,20 +354,20 @@ namespace PopovaMVVM.ViewModel
                 emp.Position = Positions.FirstOrDefault(p => p.PositionId == emp.PositionId);
             }
 
-            // Связь штатных с отделами и позициями
+            // Для штатного расписания
             foreach (var s in Staffing)
             {
                 s.Department = Departments.FirstOrDefault(d => d.DepartmentId == s.DepartmentId);
                 s.Position = Positions.FirstOrDefault(p => p.PositionId == s.PositionId);
             }
 
-            // Связь выплат с позициями
+            // Для доплат
             foreach (var pay in AdditionalPayments)
             {
                 pay.Position = Positions.FirstOrDefault(p => p.PositionId == pay.PositionId);
             }
 
-            // Связь позиций с отделами
+            // Для позиций
             foreach (var pos in Positions)
             {
                 pos.Department = Departments.FirstOrDefault(d => d.DepartmentId == pos.DepartmentId);
@@ -398,14 +378,12 @@ namespace PopovaMVVM.ViewModel
         private void AddEmployee()
         {
             var addWindow = new AddEmployeeWindow(Positions);
-            addWindow.Owner = System.Windows.Application.Current.MainWindow;
-
             if (addWindow.ShowDialog() == true)
             {
                 var newEmployee = addWindow.NewEmployee;
-                newEmployee.EmployeeId = Employees.Any() ? Employees.Max(e => e.EmployeeId) + 1 : 1;
+                _dbContext.Employees.Add(newEmployee);
+                _dbContext.SaveChanges();
                 Employees.Add(newEmployee);
-                SaveData(); // сохраняем сразу после добавления
             }
         }
 
@@ -413,9 +391,16 @@ namespace PopovaMVVM.ViewModel
         {
             if (SelectedEmployee != null)
             {
+                // Удаляем связанных детей
+                foreach (var child in SelectedEmployee.Children.ToList())
+                {
+                    _dbContext.Children.Remove(child);
+                }
+
+                _dbContext.Employees.Remove(SelectedEmployee);
+                _dbContext.SaveChanges();
                 Employees.Remove(SelectedEmployee);
                 SelectedEmployee = null;
-                SaveData(); // сохраняем после удаления
             }
         }
 
@@ -423,34 +408,83 @@ namespace PopovaMVVM.ViewModel
         {
             if (SelectedEmployee != null)
             {
-                MessageBox.Show($"Редактирование сотрудника: {SelectedEmployee.FullName}");
-            }
-        }
+                // Создаем копию коллекции детей для редактирования
+                var childrenCopy = new ObservableCollection<Child>(
+                    SelectedEmployee.Children.Select(c => new Child
+                    {
+                        FullName = c.FullName,
+                        DateOfBirth = c.DateOfBirth,
+                        EmployeeId = c.EmployeeId
+                    }));
 
-        public void SaveEmployees()
-        {
-            SaveData(); // сохраняем изменения
-            MessageBox.Show("Данные сотрудников сохранены");
+                var employeeCopy = new Employee
+                {
+                    EmployeeId = SelectedEmployee.EmployeeId,
+                    LastName = SelectedEmployee.LastName,
+                    FirstName = SelectedEmployee.FirstName,
+                    MiddleName = SelectedEmployee.MiddleName,
+                    Gender = SelectedEmployee.Gender,
+                    BirthDate = SelectedEmployee.BirthDate,
+                    AppointmentDate = SelectedEmployee.AppointmentDate,
+                    Salary = SelectedEmployee.Salary,
+                    PositionId = SelectedEmployee.PositionId,
+                    Children = childrenCopy
+                };
+
+                var editWindow = new EditEmployee(employeeCopy, Positions);
+                if (editWindow.ShowDialog() == true)
+                {
+                    // Обновляем оригинального сотрудника
+                    SelectedEmployee.LastName = employeeCopy.LastName;
+                    SelectedEmployee.FirstName = employeeCopy.FirstName;
+                    SelectedEmployee.MiddleName = employeeCopy.MiddleName;
+                    SelectedEmployee.Gender = employeeCopy.Gender;
+                    SelectedEmployee.BirthDate = employeeCopy.BirthDate;
+                    SelectedEmployee.AppointmentDate = employeeCopy.AppointmentDate;
+                    SelectedEmployee.Salary = employeeCopy.Salary;
+                    SelectedEmployee.PositionId = employeeCopy.PositionId;
+
+                    // Обновляем детей
+                    SelectedEmployee.Children.Clear();
+                    foreach (var child in employeeCopy.Children)
+                    {
+                        SelectedEmployee.Children.Add(child);
+                    }
+
+                    _dbContext.Entry(SelectedEmployee).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
+                }
+            }
         }
 
         private void AddPosition()
         {
-            var newPos = new Position
+            var addWindow = new AddPositionWindow(Departments);
+            if (addWindow.ShowDialog() == true)
             {
-                PositionId = Positions.Count > 0 ? Positions.Max(p => p.PositionId) + 1 : 1,
-                Title = "Новая должность",
-                Department = Departments.FirstOrDefault()
-            };
-            Positions.Add(newPos);
-            SelectedPosition = newPos;
+                _dbContext.Positions.Add(addWindow.NewPosition);
+                _dbContext.SaveChanges();
+
+                // Добавляем в локальную коллекцию
+                Positions.Add(addWindow.NewPosition);
+
+                // Обновляем навигационные свойства
+                addWindow.NewPosition.Department = Departments.FirstOrDefault(d => d.DepartmentId == addWindow.NewPosition.DepartmentId);
+
+                // Уведомляем об изменении коллекции
+                OnPropertyChanged(nameof(Positions));
+            }
         }
 
         private void DeletePosition()
         {
             if (SelectedPosition != null)
             {
+                _dbContext.Positions.Remove(SelectedPosition);
+                _dbContext.SaveChanges();
                 Positions.Remove(SelectedPosition);
                 SelectedPosition = null;
+                OnPropertyChanged(nameof(Positions));
             }
         }
 
@@ -458,101 +492,167 @@ namespace PopovaMVVM.ViewModel
         {
             if (SelectedPosition != null)
             {
-                MessageBox.Show($"Редактирование должности: {SelectedPosition.Title}");
-            }
-        }
+                var editWindow = new EditPosition(SelectedPosition, Departments);
+                if (editWindow.ShowDialog() == true)
+                {
+                    // Обновляем в БД
+                    _dbContext.Entry(SelectedPosition).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
 
-        private void SavePositions()
-        {
-            SaveData();
-            MessageBox.Show("Должности сохранены");
+                    // Обновляем навигационные свойства
+                    SelectedPosition.Department = Departments.FirstOrDefault(d => d.DepartmentId == SelectedPosition.DepartmentId);
+
+                    // Уведомляем об изменениях
+                    OnPropertyChanged(nameof(SelectedPosition));
+                    OnPropertyChanged(nameof(Positions));
+                }
+            }
         }
 
         private void AddDepartment()
         {
-            var newDept = new Department
+            var addWindow = new AddDepartmentWindow();
+            if (addWindow.ShowDialog() == true)
             {
-                DepartmentId = Departments.Count > 0 ? Departments.Max(d => d.DepartmentId) + 1 : 1,
-                Name = "Новый отдел"
-            };
-            Departments.Add(newDept);
-            SelectedDepartment = newDept;
+                _dbContext.Departments.Add(addWindow.NewDepartment);
+                _dbContext.SaveChanges();
+
+                // Добавляем в локальную коллекцию
+                Departments.Add(addWindow.NewDepartment);
+
+                // Уведомляем об изменении коллекции
+                OnPropertyChanged(nameof(Departments));
+            }
         }
+
 
         private void DeleteDepartment()
         {
             if (SelectedDepartment != null)
             {
+                // Удаляем связанные позиции
+                var relatedPositions = Positions.Where(p => p.DepartmentId == SelectedDepartment.DepartmentId).ToList();
+                foreach (var position in relatedPositions)
+                {
+                    _dbContext.Positions.Remove(position);
+                }
+
+                _dbContext.Departments.Remove(SelectedDepartment);
+                _dbContext.SaveChanges();
+
+                // Удаляем из локальных коллекций
+                foreach (var position in relatedPositions)
+                {
+                    Positions.Remove(position);
+                }
                 Departments.Remove(SelectedDepartment);
+
                 SelectedDepartment = null;
+
+                // Уведомляем об изменениях
+                OnPropertyChanged(nameof(Departments));
+                OnPropertyChanged(nameof(Positions));
             }
         }
 
         private void EditDepartment()
         {
             if (SelectedDepartment != null)
-                MessageBox.Show($"Редактирование отдела: {SelectedDepartment.Name}");
-        }
+            {
+                var editWindow = new EditDepartment(SelectedDepartment);
+                if (editWindow.ShowDialog() == true)
+                {
+                    // Обновляем в БД
+                    _dbContext.Entry(SelectedDepartment).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
 
-        private void SaveDepartments()
-        {
-            SaveData();
-            MessageBox.Show("Отделы сохранены");
+                    // Уведомляем об изменениях
+                    OnPropertyChanged(nameof(SelectedDepartment));
+                    OnPropertyChanged(nameof(Departments));
+                }
+            }
         }
 
         private void AddStaffing()
         {
-            var newStaffing = new Staffing
+            var addWindow = new AddStaffingWindow(Departments, Positions);
+            if (addWindow.ShowDialog() == true)
             {
-                StaffingId = Staffing.Count > 0 ? Staffing.Max(s => s.StaffingId) + 1 : 1,
-                Department = Departments.FirstOrDefault(),
-                Position = Positions.FirstOrDefault(),
-                UnitsCount = 1,
-                Salary = 30000
-            };
-            Staffing.Add(newStaffing);
-            SelectedStaffing = newStaffing;
+                _dbContext.Staffing.Add(addWindow.NewStaffing);
+                _dbContext.SaveChanges();
+
+                // Добавляем в локальную коллекцию
+                Staffing.Add(addWindow.NewStaffing);
+
+                // Обновляем навигационные свойства
+                addWindow.NewStaffing.Department = Departments.FirstOrDefault(d => d.DepartmentId == addWindow.NewStaffing.DepartmentId);
+                addWindow.NewStaffing.Position = Positions.FirstOrDefault(p => p.PositionId == addWindow.NewStaffing.PositionId);
+
+                // Уведомляем об изменении коллекции
+                OnPropertyChanged(nameof(Staffing));
+            }
         }
 
         private void DeleteStaffing()
         {
             if (SelectedStaffing != null)
             {
+                _dbContext.Staffing.Remove(SelectedStaffing);
+                _dbContext.SaveChanges();
                 Staffing.Remove(SelectedStaffing);
                 SelectedStaffing = null;
+                OnPropertyChanged(nameof(Staffing));
             }
         }
 
         private void EditStaffing()
         {
             if (SelectedStaffing != null)
-                MessageBox.Show("Редактирование штатной единицы");
-        }
+            {
+                var editWindow = new EditStaffing(SelectedStaffing, Departments, Positions);
+                if (editWindow.ShowDialog() == true)
+                {
+                    // Обновляем в БД
+                    _dbContext.Entry(SelectedStaffing).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
 
-        private void SaveStaffings()
-        {
-            SaveData();
-            MessageBox.Show("Штатное расписание сохранено");
+                    // Обновляем навигационные свойства
+                    SelectedStaffing.Department = Departments.FirstOrDefault(d => d.DepartmentId == SelectedStaffing.DepartmentId);
+                    SelectedStaffing.Position = Positions.FirstOrDefault(p => p.PositionId == SelectedStaffing.PositionId);
+
+                    // Уведомляем об изменениях
+                    OnPropertyChanged(nameof(SelectedStaffing));
+                    OnPropertyChanged(nameof(Staffing));
+                }
+            }
         }
 
         private void AddPayment()
         {
-            var newPayment = new AdditionalPayment
+            var addWindow = new AddPaymentWindow(Positions);
+            if (addWindow.ShowDialog() == true)
             {
-                PaymentId = AdditionalPayments.Count > 0 ? AdditionalPayments.Max(p => p.PaymentId) + 1 : 1,
-                Position = Positions.FirstOrDefault(),
-                Amount = 0,
-                Description = "Новая выплата"
-            };
-            AdditionalPayments.Add(newPayment);
-            SelectedPayment = newPayment;
+                _dbContext.AdditionalPayments.Add(addWindow.NewPayment);
+                _dbContext.SaveChanges();
+                AdditionalPayments.Add(addWindow.NewPayment);
+
+                // Обновляем навигационные свойства
+                addWindow.NewPayment.Position = Positions.FirstOrDefault(p => p.PositionId == addWindow.NewPayment.PositionId);
+            }
         }
 
         private void DeletePayment()
         {
             if (SelectedPayment != null)
             {
-                AdditionalPayments.Remove(SelectedPayment);
+                var id = SelectedPayment.PaymentId;
+                _dbContext.AdditionalPayments.Remove(SelectedPayment);
+                _dbContext.SaveChanges();
+
+                // Перезагружаем данные
+                AdditionalPayments.Clear();
+                AdditionalPayments.AddRange(_dbContext.AdditionalPayments.ToList());
+
                 SelectedPayment = null;
             }
         }
@@ -560,13 +660,18 @@ namespace PopovaMVVM.ViewModel
         private void EditPayment()
         {
             if (SelectedPayment != null)
-                MessageBox.Show($"Редактирование выплаты: {SelectedPayment.Description}");
-        }
+            {
+                var editWindow = new EditPayment(SelectedPayment, Positions);
+                if (editWindow.ShowDialog() == true)
+                {
+                    _dbContext.Entry(SelectedPayment).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
 
-        private void SavePayments()
-        {
-            SaveData();
-            MessageBox.Show("Выплаты сохранены");
+                    // Обновляем навигационные свойства
+                    SelectedPayment.Position = Positions.FirstOrDefault(p => p.PositionId == SelectedPayment.PositionId);
+                    OnPropertyChanged(nameof(SelectedPayment));
+                }
+            }
         }
     }
 
@@ -580,6 +685,11 @@ namespace PopovaMVVM.ViewModel
                 collection.Add(item);
             }
         }
+
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> source)
+        {
+            return new ObservableCollection<T>(source);
+        }
     }
 
     public class ObservableObject : INotifyPropertyChanged
@@ -592,3 +702,7 @@ namespace PopovaMVVM.ViewModel
         }
     }
 }
+    
+
+
+

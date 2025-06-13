@@ -22,20 +22,18 @@ namespace PopovaMVVM
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ClassViewModel _viewModel;
-
         public MainWindow()
         {
             InitializeComponent();
-            _viewModel = new ClassViewModel();
-            DataContext = _viewModel;
+
+            // Убедитесь, что DataContext устанавливается один раз
+            DataContext = new ClassViewModel();
             Closing += MainWindow_Closing;
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            _viewModel.SaveData();
+            (DataContext as ClassViewModel)?.SaveData();
         }
     }
-
 }

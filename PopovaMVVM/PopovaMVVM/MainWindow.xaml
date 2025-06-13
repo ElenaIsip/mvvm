@@ -44,7 +44,8 @@
                                 <DataGridTextColumn Header="Дата рождения" Binding="{Binding BirthDate, StringFormat=d}" Width="Auto"/>
                                 <DataGridTextColumn Header="Дата приема" Binding="{Binding AppointmentDate, StringFormat=d}" Width="Auto"/>
                                 <DataGridTextColumn Header="Оклад" Binding="{Binding Salary, StringFormat=C}" Width="Auto"/>
-                                <DataGridTextColumn Header="Должность" Binding="{Binding Position.Title}" Width="*"/>
+                                <DataGridTextColumn Header="Должность" Binding="{Binding Position.Title}" Width="*"
+                                           />
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -53,7 +54,7 @@
                             <DataGrid ItemsSource="{Binding SelectedEmployeeChildren}" AutoGenerateColumns="False" IsReadOnly="True">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*"/>
-                                    <DataGridTextColumn Header="Дата рождения" Binding="{Binding BirthDate, StringFormat=d}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Дата рождения" Binding="{Binding DateOfBirth, StringFormat=d}" Width="Auto"/>
                                     <DataGridTextColumn Header="Возраст" Binding="{Binding Age}" Width="Auto"/>
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -71,7 +72,7 @@
                         <Button Content="Редактировать" Command="{Binding EditPositionCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SavePositionCommand}" Margin="2"/>
                     </StackPanel>
-                    <DataGrid ItemsSource="{Binding Positions}" AutoGenerateColumns="False" Height="Auto" Margin="0,0,0,10">
+                    <DataGrid ItemsSource="{Binding Positions}"  SelectedItem="{Binding SelectedPosition, Mode=TwoWay}" AutoGenerateColumns="False" Height="Auto" Margin="0,0,0,10">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Код" Binding="{Binding PositionId}" Width="Auto"/>
                             <DataGridTextColumn Header="Должность" Binding="{Binding Title}" Width="*"/>
@@ -96,7 +97,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <!-- Отделы -->
-                        <DataGrid Grid.Row="0" ItemsSource="{Binding Departments}" AutoGenerateColumns="False"
+                        <DataGrid Grid.Row="0" ItemsSource="{Binding Departments}"  AutoGenerateColumns="False"
                                   SelectionMode="Single" SelectedItem="{Binding SelectedDepartment}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Код" Binding="{Binding DepartmentId}" Width="Auto"/>
@@ -125,7 +126,7 @@
                         <Button Content="Редактировать" Command="{Binding EditStaffingCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SaveStaffingCommand}" Margin="2"/>
                     </StackPanel>
-                    <DataGrid ItemsSource="{Binding Staffing}" AutoGenerateColumns="False" Margin="5">
+                    <DataGrid ItemsSource="{Binding Staffing}" SelectedItem="{Binding SelectedStaffing, Mode=TwoWay}" AutoGenerateColumns="False" Margin="5">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Код" Binding="{Binding StaffingId}" Width="Auto"/>
                             <DataGridTextColumn Header="Отдел" Binding="{Binding Department.Name}" Width="*"/>
@@ -146,7 +147,7 @@
                         <Button Content="Редактировать" Command="{Binding EditPaymentCommand}" Margin="2"/>
                         <Button Content="Сохранить" Command="{Binding SavePaymentCommand}" Margin="2"/>
                     </StackPanel>
-                    <DataGrid ItemsSource="{Binding AdditionalPayments}" AutoGenerateColumns="False" Margin="5">
+                    <DataGrid ItemsSource="{Binding AdditionalPayments}"  SelectedItem="{Binding SelectedPayment, Mode=TwoWay}" AutoGenerateColumns="False" Margin="5">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Код" Binding="{Binding PaymentId}" Width="Auto"/>
                             <DataGridTextColumn Header="Должность" Binding="{Binding Position.Title}" Width="*"/>

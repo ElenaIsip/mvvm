@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,7 +12,9 @@ namespace PopovaMVVM.Model
 {
     public class AdditionalPayment : INotifyPropertyChanged
     {
-        private int _paymentId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int PaymentId { get; set; }
         private int _positionId;
         private decimal _amount;
         private string _description;
@@ -20,13 +24,6 @@ namespace PopovaMVVM.Model
         {
             get => _position;
             set { _position = value; OnPropertyChanged(); }
-        }
-
-
-        public int PaymentId
-        {
-            get => _paymentId;
-            set { _paymentId = value; OnPropertyChanged(); }
         }
 
         public int PositionId

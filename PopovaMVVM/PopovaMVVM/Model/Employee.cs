@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,7 +13,9 @@ namespace PopovaMVVM.Model
 {
     public class Employee : INotifyPropertyChanged
     {
-        private int _employeeId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int EmployeeId { get; set; }
         private string _lastName;
         private string _firstName;
         private string _middleName;
@@ -23,17 +27,16 @@ namespace PopovaMVVM.Model
         private ObservableCollection<Child> _children = new ObservableCollection<Child>();
 
         private Position _position;
+        internal object Id;
+        internal object DateOfBirth;
+        internal object HireDate;
+
         public Position Position
         {
             get => _position;
             set { _position = value; OnPropertyChanged(); }
         }
 
-        public int EmployeeId
-        {
-            get => _employeeId;
-            set { _employeeId = value; OnPropertyChanged(); }
-        }
 
         public string LastName
         {
@@ -90,6 +93,7 @@ namespace PopovaMVVM.Model
             get => _children;
             set { _children = value; OnPropertyChanged(); }
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

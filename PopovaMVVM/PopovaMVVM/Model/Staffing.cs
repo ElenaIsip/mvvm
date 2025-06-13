@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,7 +12,9 @@ namespace PopovaMVVM.Model
 {
     public class Staffing : INotifyPropertyChanged
     {
-        private int _staffingId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int StaffingId { get; set; }
         private int _positionId;
         private int _departmentId;
         private int _unitsCount;
@@ -29,12 +33,7 @@ namespace PopovaMVVM.Model
             get => _position;
             set { _position = value; OnPropertyChanged(); }
         }
-        public int StaffingId
-        {
-            get => _staffingId;
-            set { _staffingId = value; OnPropertyChanged(); }
-        }
-
+      
         public int PositionId
         {
             get => _positionId;

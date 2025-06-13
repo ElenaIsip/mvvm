@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,15 +12,11 @@ namespace PopovaMVVM.Model
 {
     public class Position : INotifyPropertyChanged
     {
-        private int _positionId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int PositionId { get; set; }
         private string _title;
         private int _departmentId;
-
-        public int PositionId
-        {
-            get => _positionId;
-            set { _positionId = value; OnPropertyChanged(); }
-        }
 
         public string Title
         {

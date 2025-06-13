@@ -1,5 +1,14 @@
 ﻿
 
 FD:\Mvvm\PopovaMVVM\PopovaMVVM\MainWindow.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\AddDepartmentWindow.xaml;;
 FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\AddEmployeeWindow.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\AddPaymentWindow.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\AddPositionWindow.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\AddStaffingWindow.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\EditDepartment.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\EditEmployee.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\EditPayment.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\EditPosition.xaml;;
+FD:\Mvvm\PopovaMVVM\PopovaMVVM\ViewModel\EditStaffing.xaml;;
 

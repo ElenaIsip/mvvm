@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,39 +12,59 @@ namespace PopovaMVVM.Model
 {
     public class Child : INotifyPropertyChanged
     {
-        private int _childId;
-        private int _employeeId;
-        private string _fullName;
-        private DateTime _birthDate;
-
-        public int ChildId
+        private int id;
+        [Key]
+        [Column("ChildId")] // Изменено на вероятное имя столбца в БД
+        public int Id
         {
-            get => _childId;
-            set { _childId = value; OnPropertyChanged(); }
+            get => id;
+            set
+            {
+                id = value;
+                OnPropertyChanged();
+            }
         }
 
-        public int EmployeeId
-        {
-            get => _employeeId;
-            set { _employeeId = value; OnPropertyChanged(); }
-        }
-
+        private string fullName;
         public string FullName
         {
-            get => _fullName;
-            set { _fullName = value; OnPropertyChanged(); }
+            get => fullName;
+            set
+            {
+                fullName = value;
+                OnPropertyChanged();
+            }
         }
 
-        public DateTime BirthDate
+        private DateTime dateOfBirth;
+        [Column("BirthDate")] // Явно указываем имя столбца
+        public DateTime DateOfBirth
         {
-            get => _birthDate;
-            set { _birthDate = value; OnPropertyChanged(); }
+            get => dateOfBirth;
+            set
+            {
+                dateOfBirth = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Age));
+            }
         }
 
-        public int Age => DateTime.Now.Year - BirthDate.Year -
-            (DateTime.Now.DayOfYear < BirthDate.DayOfYear ? 1 : 0);
+        private int employeeId;
+        public int EmployeeId
+        {
+            get => employeeId;
+            set
+            {
+                employeeId = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [NotMapped]
+        public int Age => DateTime.Now.Year - DateOfBirth.Year;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

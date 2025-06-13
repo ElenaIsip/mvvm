@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using PopovaMVVM.Model;
 
 namespace PopovaMVVM.ViewModel
@@ -10,5 +11,7 @@ namespace PopovaMVVM.ViewModel
         public List<Department> Departments { get; set; }
         public List<AdditionalPayment> AdditionalPayments { get; set; }
         public List<Staffing> Staffing { get; set; }
+
+       
     }
 }

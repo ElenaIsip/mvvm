@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 D:\Mvvm\PopovaMVVM\PopovaMVVM\App.xaml
-22087035854
+111110507017
 
-221050731764
-123-1601078063
-MainWindow.xaml;ViewModel\AddEmployeeWindow.xaml;
+35-1703903312
+1501343954044
+MainWindow.xaml;ViewModel\AddDepartmentWindow.xaml;ViewModel\AddEmployeeWindow.xaml;ViewModel\AddPaymentWindow.xaml;ViewModel\AddPositionWindow.xaml;ViewModel\AddStaffingWindow.xaml;ViewModel\EditDepartment.xaml;ViewModel\EditEmployee.xaml;ViewModel\EditPayment.xaml;ViewModel\EditPosition.xaml;ViewModel\EditStaffing.xaml;
 
-True
+False
 
